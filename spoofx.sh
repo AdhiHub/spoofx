@@ -37,7 +37,7 @@ check_root() {
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}[!] Root privileges required${RESET}"
         echo -e "${YELLOW}[!] Run: sudo ./spoofx.sh${RESET}"
-        sleep 2
+        exit 1
     fi
 }
 
@@ -52,7 +52,7 @@ get_subnet() {
         echo "192.168.1.0/24"
         return
     fi
-    ip -4 addr show "$iface" 2>/dev/null | grep -oP 'inet \K[\d.]+/\d+' | head -1
+    ip -4 addr show "$iface" 2>/dev/null | grep 'inet ' | awk '{print $2}' | head -1
 }
 
 arp_scan() {
@@ -168,22 +168,7 @@ restore_arp() {
 
     echo -e "${GREEN}[✓] Stopped ARP spoofing${RESET}" | tee -a "$LOG"
 
-    local targets
-    targets=$(arp -a 2>/dev/null | head -20)
-    if [ -n "$targets" ]; then
-        echo "$targets" | while IFS= read -r line; do
-            local ip mac
-            ip=$(echo "$line" | grep -oP '\(\K[\d.]+')
-            mac=$(echo "$line" | grep -oP 'at \K[\da-f:]+')
-            if [ -n "$ip" ] && [ -n "$mac" ]; then
-                arp -s "$ip" "$mac" 2>/dev/null
-            fi
-        done
-        echo -e "${GREEN}[✓] Static ARP entries restored${RESET}" | tee -a "$LOG"
-    fi
-
-    echo -e "${GREEN}[✓] Network should be back to normal${RESET}" | tee -a "$LOG"
-    echo -e "${YELLOW}[i] If issues persist, run: ip neigh flush all${RESET}" | tee -a "$LOG"
+    echo -e "${GREEN}[✓] ARP cleanup done. Run: ip neigh flush all${RESET}" | tee -a "$LOG"
 }
 
 main_menu() {
@@ -201,7 +186,9 @@ main_menu() {
         echo "  5) Help"
         echo "  6) Exit"
         echo ""
-        read -p "$(echo -e ${GREEN}┌─[${RESET}${RED}SpoofX${RESET}${GREEN}]─[${RESET}${YELLOW}Menu${RESET}${GREEN}]${RESET})"$'\n└──╼ ' opt
+        echo -ne "${GREEN}┌─[${RESET}${RED}SpoofX${RESET}${GREEN}]─[${RESET}${YELLOW}Menu${RESET}${GREEN}]${RESET}"
+        echo -ne $'\n└──╼ '
+        read opt
 
         case $opt in
             1) arp_scan ;;
