@@ -1,55 +1,106 @@
-# SpoofX v1.0
+# SPOOFX — ARP Spoofing & MITM Toolkit
 
-**ARP Spoofing & MITM Packet Sniffer**
+**Discover live hosts on a network, perform ARP spoofing attacks, and sniff traffic.**
 
-Discover live hosts, perform ARP spoofing attacks, and sniff network traffic. Works with or without dedicated tools installed.
+Part of the **AdhiHub** security toolkit.
+
+---
+
+## What It Does
+
+| Mode | What It Does |
+|------|-------------|
+| **ARP Scan** | Scans your local network to find live hosts and their IP/MAC addresses |
+| **ARP Spoof** | Convinces the target and gateway you're the other one (MITM) — traffic flows through your machine |
+| **Sniff Traffic** | Captures packets flowing through your interface so you can inspect them |
+| **Restore ARP** | Restores the network to normal state when you're done |
+
+If tools like `arp-scan` or `arpspoof` are installed: SpoofX uses them.
+If not: SpoofX shows you the **exact manual commands** to copy-paste.
+
+---
 
 ## One-Line Install
 
 ```bash
-curl -sL https://raw.githubusercontent.com/AdhiHub/spoofx/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/AdhiHub/spoofx/main/install.sh | bash
 ```
 
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| ARP Scan | Discover live hosts via arp-scan, arping, or ping sweep |
-| ARP Spoof | MITM between target and gateway |
-| Traffic Sniff | Capture packets with tcpdump |
-| ARP Restore | Reset ARP tables and stop spoofing |
-| Fallback Mode | Shows manual commands if tools are not installed |
-| Logging | All activity saved to timestamped log |
-
-## Usage
+After install:
 
 ```bash
-# Interactive menu (requires root)
-sudo ./spoofx.sh
-
-# Show help
-./spoofx.sh -h
+sudo spoofx
 ```
 
-Menu options:
-1. **ARP Scan** - Scan subnet for live hosts
-2. **ARP Spoof** - Spoof target and gateway (MITM)
-3. **Sniff Traffic** - Capture packets on an interface
-4. **Restore ARP** - Reset ARP tables to normal state
-5. **Help** - Usage information
+---
+
+## How to Use
+
+**Root is required** for ARP operations.
+
+```bash
+# Interactive menu
+sudo spoofx
+
+# Help
+spoofx -h
+```
+
+### Menu Options
+
+1. **ARP Scan** — Enter your network (e.g. `192.168.1.0/24`) to discover live hosts
+2. **ARP Spoof** — Enter target IP and gateway IP to start MITM
+3. **Sniff Traffic** — Enter interface name (e.g. `wlan0`) to capture packets
+4. **Restore ARP** — Enter target IP and gateway IP to clean up
+
+---
+
+## Step-by-Step Example
+
+```
+1) ARP Scan
+   Enter network: 192.168.1.0/24
+   [+] Found: 192.168.1.1 (gateway)
+   [+] Found: 192.168.1.105 (target)
+
+2) ARP Spoof
+   Target IP: 192.168.1.105
+   Gateway IP: 192.168.1.1
+   [+] Spoofing started... traffic now flows through you
+
+3) Sniff Traffic
+   Interface: wlan0
+   [+] Capturing packets... (saved to capture.pcap)
+
+4) Restore ARP
+   Target IP: 192.168.1.105
+   Gateway IP: 192.168.1.1
+   [+] ARP tables restored
+```
+
+---
 
 ## Requirements
 
+- **Linux** or **Termux** (Android) with **root**
 - Bash 4+
-- curl
-- Root privileges
 - Optional: arp-scan, arpspoof (dsniff), tcpdump
 
-Works on **Linux** and **Termux** (Android) with root.
+---
 
-## Disclaimer
+## Run Without Installing
 
+```bash
+git clone https://github.com/AdhiHub/spoofx.git
+cd spoofx
+chmod +x spoofx.sh
+sudo ./spoofx.sh
 ```
-Use at your own risk. Developer(s) assume NO liability.
-For authorized testing only on networks you own or have written permission.
-```
+
+---
+
+> **⚠️ DISCLAIMER: FOR EDUCATIONAL PURPOSES ONLY**
+>
+> Use at your own risk. Developer(s) assume NO liability.
+> Only use on networks you own or have explicit written permission to test.
+> ARP spoofing without permission is illegal in most jurisdictions.
